@@ -1,0 +1,35 @@
+<div class="p-4">
+    <div class="container">
+        <h1>Admin</h1>
+        <p>This section can only be accessed by administrators.</p>
+        <p><a routerLink="accounts">Manage Accounts</a></p>
+        <p><a routerLink="employees">Manage Employees</a></p>
+        <p><a routerLink="departments">Manage Departments</a></p>
+        <p><a routerLink="requests">View Requests</a></p>
+
+        <router-outlet></router-outlet>
+    </div>
+</div>
+
+<!--
+<div class="admin-container">
+  <div class="admin-card">
+    <h1>Admin</h1>
+    <p class="subtitle">This section can only be accessed by administrators.</p>
+    <div class="admin-actions">
+      <button routerLink="accounts" class="admin-btn">
+        <i class="fas fa-user-cog"></i> Manage Accounts
+      </button>
+      <button routerLink="employees" class="admin-btn">
+        <i class="fas fa-users"></i> Manage Employees
+      </button>
+      <button routerLink="departments" class="admin-btn">
+        <i class="fas fa-building"></i> Manage Departments
+      </button>
+      <button routerLink="requests" class="admin-btn">
+        <i class="fas fa-eye"></i> View Requests
+      </button>
+    </div>
+  </div>
+</div>
+-->
