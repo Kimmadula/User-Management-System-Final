@@ -1,6 +1,12 @@
 const jwt = require('express-jwt');
-const { secret } = require('config.json');
 const db = require('_helpers/db');
+
+// Get secret from environment variable
+const secret = process.env.JWT_SECRET;
+
+if (!secret) {
+    throw new Error('JWT_SECRET environment variable is not set.');
+}
 
 module.exports = authorize;
 
@@ -17,11 +23,9 @@ function authorize(roles = []) {
         async (req, res, next) => {
             const account = await db.Account.findByPk(req.user.id);
             if (!account || (roles.length && !roles.includes(account.role))) {
-                // account no longer exists or role not authorized
                 return res.status(401).json({ message: 'Unauthorized' });
             }
 
-            // authentication and authorization successful
             req.user.role = account.role;
             const refreshTokens = await account.getRefreshTokens();
             req.user.ownsToken = token => !!refreshTokens.find(x => x.token === token);
