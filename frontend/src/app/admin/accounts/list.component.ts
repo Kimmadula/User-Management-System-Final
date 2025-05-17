@@ -31,23 +31,6 @@ export class ListComponent implements OnInit {
             });
     }
 
-    deleteAccount(id: string) {
-        const account = this.accounts.find(x => x.id === id);
-        account.isDeleting = true;
-        this.accountService.delete(id)
-            .pipe(first())
-            .subscribe({
-                next: () => {
-                    this.accounts = this.accounts.filter(x => x.id !== id);
-                    this.alertService.success('Account deleted successfully');
-                },
-                error: error => {
-                    this.alertService.error('Error deleting account: ' + (error?.message || 'Unknown error'));
-                    account.isDeleting = false;
-                }
-            });
-    }
-
     toggleAccountStatus(id: string) {
         const account = this.accounts.find(x => x.id === id);
         
