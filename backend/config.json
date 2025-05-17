@@ -1,12 +1,13 @@
 {
   "database": {
-    "host": "localhost",
-    "port": 3306,
-    "user": "root",
-    "password": "",
-    "database": "node-mysql-signup-verification-api"
+    "dialect": "postgres",
+    "host": "dpg-d0k1o4je5dus73bch840-a",
+    "port": 5432,
+    "user": "node_mysql_api_user",
+    "password": "ALjw5CYgy1MsBRwZwH8Z0vl6bBHyrDfP",
+    "database": "node_mysql_api"
   },
-  "secret": "THIS IS USED TO SIGN AND VERIFY JWT TOKENS, REPLACE IT WITH YOUR OWN SECRET, IT CAN BE ANY STRING",
+  "secret": "YOUR_NEW_JWT_SECRET",
   "emailFrom": "info@node-mysql-signup-verification-api.com",
   "smtpOptions": {
     "host": "smtp.ethereal.email",

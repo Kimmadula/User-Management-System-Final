@@ -5,7 +5,21 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const errorHandler = require('./_middleware/error-handler');
+const config = require('../config.json').database;
+const { Sequelize } = require('sequelize');
 
+const sequelize = new Sequelize(
+  config.database,
+  config.user,
+  config.password,
+  {
+    host: config.host,
+    port: config.port,
+    dialect: 'postgres', // CHANGE HERE
+    logging: false
+  }
+);
+module.exports = sequelize;
 
 app.use(cors({
   origin: 'http://localhost:4200', // Angular app URL
@@ -104,5 +118,5 @@ app.use((err, req, res, next) => {
 });
 
 // start server
-const port = process.env.NODE_ENV === 'production' ? (process.env.PORT || 80) : 4000;
+const port = process.env.PORT || 4000;
 app.listen(port, () => console.log('Server listening on port ' + port));
