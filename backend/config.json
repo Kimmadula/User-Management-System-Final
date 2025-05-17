@@ -15,5 +15,12 @@
       "user": "dallin45@ethereal.email",
       "pass": "4EHmznyxJFB8WpvGSB"
     }
+  },
+  "development": {
+    "username": "u875409848_gijan",
+    "password": "9T2Z5$3UKkgSYzE",
+    "database": "u875409848_gijan",
+    "host": "153.92.15.31",
+    "dialect": "mysql"
   }
 }
