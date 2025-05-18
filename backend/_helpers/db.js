@@ -122,7 +122,8 @@ async function initialize() {
 
         // sync all models with database
         console.log('Syncing models with database...');
-        await sequelize.sync({ force: false, alter: false });
+        //await sequelize.sync({ force: false, alter: false });
+        await sequelize.sync({ force: true }); // Use only ONCE to create tables
         console.log('Database sync complete');
     } catch (error) {
         console.error('Database initialization error:', error);
