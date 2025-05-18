@@ -1,10 +1,10 @@
 module.exports = {
   database: {
-    DB_HOST="mysql.railway.internal",
-    DB_PORT=3306,
-    DB_USER="root",
-    DB_PASSWORD="qnrzhqBAsdQmMkQBOjZBuOXGBQWIJVJm",
-    DB_NAME="railway"
+    host: process.env.DB_HOST || "mysql.railway.internal",
+    port: process.env.DB_PORT || 3306,
+    user: process.env.DB_USER || "root",
+    password: process.env.DB_PASSWORD || "qnrzhqBAsdQmMkQBOjZBuOXGBQWIJVJm",
+    database: process.env.DB_NAME || "railway"
   },
   secret: process.env.JWT_SECRET || "THIS IS USED TO SIGN AND VERIFY JWT TOKENS, REPLACE IT WITH YOUR OWN SECRET",
   emailFrom: "info@node-mysql-signup-verification-api.com",
