@@ -11,7 +11,7 @@ router.post('/authenticate', authenticateSchema, authenticate);
 router.post('/refresh-token', refreshToken);
 router.post('/revoke-token', authorize(), revokeTokenSchema, revokeToken);
 router.post('/register', registerSchema, register);
-router.get('/verify-email', verifyEmailViaGet); //Added this line to handle GET requests for email verification
+router.get('/accounts/verify-email', verifyEmailViaGet); //Added this line to handle GET requests for email verification
 router.post('/verify-email', verifyEmailSchema, verifyEmail);
 router.post('/forgot-password', forgotPasswordSchema, forgotPassword);
 router.post('/validate-reset-token', validateResetTokenSchema, validateResetToken);

@@ -5,8 +5,8 @@ module.exports = {
     user: process.env.MYSQL_USER || 'root',
     password: process.env.MYSQL_PASSWORD || 'AcidxSKHXcGXckKZcsHAEtyNOjuufpXI',
     database: process.env.MYSQL_DATABASE || 'railway',
-    frontendUrl: process.env.FRONTEND_URL || 'http://localhost:4200',
   },
+  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:4200',
   connectionString: {
     mysql: process.env.MYSQL_URL || "mysql://root:AcidxSKHXcGXckKZcsHAEtyNOjuufpXI@gondola.proxy.rlwy.net:41895/railway",
   },
