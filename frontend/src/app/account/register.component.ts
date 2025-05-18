@@ -57,7 +57,8 @@ export class RegisterComponent implements OnInit {
                     this.router.navigate(['../login'], { relativeTo: this.route });
                 },
                 error: error => {
-                    this.alertService.error(error);
+                    const message = error?.error?.message || error?.message || 'Unknown error';
+                    this.alertService.error(message);
                     this.loading = false;
                 }
             });
