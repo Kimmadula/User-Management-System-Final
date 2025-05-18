@@ -1,6 +1,7 @@
 const mysql = require('mysql2/promise');
 const { Sequelize } = require('sequelize');
 const bcrypt = require('bcryptjs'); 
+const { Account } = require('./models');
 
 module.exports = db = {};
 
@@ -13,6 +14,25 @@ console.log('Env variables:', {
 });
 
 initialize();
+
+async function createAdmin() {
+  const hashedPassword = await bcrypt.hash('1234567', 10);
+
+  await Account.create({
+    title: 'Mr',
+    firstName: 'Iris',
+    lastName: 'Tumakay',
+    email: 'admin@example.com',
+    passwordHash: hashedPassword,
+    role: 'Admin',
+    isVerified: true,      // Ensure account is verified
+    isActive: true         // Ensure account is active
+  });
+
+  console.log('Admin account created.');
+}
+
+createAdmin();
 
 async function initialize() {
     try {
@@ -83,37 +103,6 @@ async function initialize() {
         await sequelize.sync({ alter: true });
         console.log('Database sync complete');
 
-        const [rows] = await sequelize.query(
-            `SELECT COUNT(*) AS count FROM accounts WHERE email = 'admin@example.com'`
-        );
-
-        if (rows[0].count === 0) {
-            const plainPassword = '1234567';
-            const passwordHash = await bcrypt.hash(plainPassword, 10);
-
-            await sequelize.query(`
-                INSERT INTO accounts (
-                    email, passwordHash, title, firstName, lastName,
-                    acceptTerms, role, created, isActive, verified
-                ) VALUES (
-                    'admin@example.com',
-                    '${passwordHash}',
-                    'Mr',
-                    'Iris',
-                    'Tumakay',
-                    true,
-                    'Admin',
-                    NOW(),
-                    true,
-                    NOW()
-                )
-            `);
-
-            console.log(' Default admin account inserted.');
-        } else {
-            
-            console.log(' Admin account already exists.');
-        }
     } catch (error) {
         console.error('Database initialization error:', error);
         throw error;
