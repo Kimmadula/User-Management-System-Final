@@ -19,7 +19,7 @@ app.use(cors({
       'https://user-management-system-final-27.onrender.com'
     ];
     if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, origin || true);
+      callback(null, true); 
     } else {
       callback(new Error('Not allowed by CORS'));
     }
