@@ -17,7 +17,7 @@ module.exports = {
     secure: true,
     auth: {
       user: "iristumakaydummy@gmail.com",
-      pass: "Tumakay04"
+      pass: "4p2u d67m k66p 3osf 7ijq l4ga ebhj rwwt"
     }
   }
 };
