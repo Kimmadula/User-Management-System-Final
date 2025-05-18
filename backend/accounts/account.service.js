@@ -16,6 +16,7 @@ module.exports = {
     forgotPassword,
     validateResetToken,
     resetPassword,
+    SendEmail,
     getAll,
     getById,
     create,
@@ -324,6 +325,21 @@ async function sendAlreadyRegisteredEmail(email, origin) {
                <p>Your email <strong>${email}</strong> is already registered.</p>
                ${message}`
     });
+}
+
+async function sendEmail({ to, subject, html, from = config.emailFrom }) {
+    const transporter = nodemailer.createTransport(config.smtpOptions);
+
+    // Debug: verify connection
+    transporter.verify(function (error, success) {
+        if (error) {
+            console.error("Email transport verification failed:", error);
+        } else {
+            console.log("Server is ready to take our messages");
+        }
+    });
+
+    await transporter.sendMail({ from, to, subject, html });
 }
 
 async function sendPasswordResetEmail(account, origin) {
