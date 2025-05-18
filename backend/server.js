@@ -12,7 +12,18 @@ dotenv.config();
 
 // Middleware setup
 app.use(cors({
-  origin: 'http://localhost:4200', // Angular app URL
+  origin: function(origin, callback) {
+    const allowedOrigins = [
+      'http://localhost:4200',
+      'https://user-management-system-final-29.onrender.com',
+      'https://user-management-system-final-27.onrender.com'
+    ];
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, origin || allowedOrigins[0]);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 
