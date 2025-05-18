@@ -54,6 +54,10 @@ app.use('/requests', require('./requests/index'));
 // Swagger docs route
 app.use('/api-docs', require('./_helpers/swagger'));
 
+app.get('/', (req, res) => {
+  res.send('User Management System API is running!');
+});
+
 // Global error handler
 app.use((err, req, res, next) => {
   console.error('Global error handler caught:', err);
