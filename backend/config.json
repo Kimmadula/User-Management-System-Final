@@ -1,10 +1,10 @@
 {
   "database": {
-    "host": "localhost",
-    "port": 3306,
-    "user": "root",
-    "password": "",
-    "database": "node-mysql-signup-verification-api"
+    "host": "dpg-d0kl6bd6ubrc73bcsgv0-a.oregon-postgres.render.com",
+    "port": 5432,
+    "user": "user_management_db_bcx9_user",
+    "password": "caKuDO3TejUB3wNkRg8ayfgiPIbAwQWw",
+    "database": "user_management_db_bcx9"
   },
   "secret": "THIS IS USED TO SIGN AND VERIFY JWT TOKENS, REPLACE IT WITH YOUR OWN SECRET, IT CAN BE ANY STRING",
   "emailFrom": "info@node-mysql-signup-verification-api.com",

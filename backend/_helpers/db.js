@@ -1,5 +1,4 @@
 const config = require('../config.json');
-const mysql = require('mysql2/promise');
 const { Sequelize } = require('sequelize');
 
 module.exports = db = {};
@@ -10,16 +9,11 @@ async function initialize() {
     try {
         const { host, port, user, password, database } = config.database;
 
-        // 1. Create DB if missing
-        const adminConn = await mysql.createConnection({ host, port, user, password });
-        await adminConn.query(`CREATE DATABASE IF NOT EXISTS \`${database}\`;`);
-        await adminConn.end();
-
-        // 2. Initialize Sequelize
+        // 1. Initialize Sequelize for PostgreSQL
         const sequelize = new Sequelize(database, user, password, {
             host,
             port,
-            dialect: 'mysql',
+            dialect: 'postgres', // <-- change this from 'mysql' to 'postgres'
             logging: false,
             pool: {
                 max: 5,
@@ -33,10 +27,10 @@ async function initialize() {
             }
         });
 
-        // 3. Load models
+        // 2. Load models
         db.User = require('../models/user.model')(sequelize, Sequelize.DataTypes);
-        
-        // 4. Sync all models
+
+        // 3. Sync all models
         await sequelize.sync({ alter: true });
         console.log('Database synced');
 
