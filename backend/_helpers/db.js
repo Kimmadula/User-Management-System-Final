@@ -17,11 +17,11 @@ initialize();
 async function initialize() {
     try {
         // Read database config from environment variables
-        const host = process.env.MYSQL_HOST || 'localhost';
-        const port = process.env.MYSQL_PORT || 3306;
+        const host = process.env.MYSQL_HOST || 'gondola.proxy.rlwy.net';
+        const port = process.env.MYSQL_PORT || 58293;
         const user = process.env.MYSQL_USER || 'root';
-        const password = process.env.MYSQL_PASSWORD || '';
-        const database = process.env.MYSQL_DATABASE || 'testdb';
+        const password = process.env.MYSQL_PASSWORD || 'qnrzhqBAsdQmMkQBOjZBuOXGBQWIJVJm';
+        const database = process.env.MYSQL_DATABASE || 'railway';
 
         console.log(`Connecting to database: ${database} on ${host}:${port}`);
 
