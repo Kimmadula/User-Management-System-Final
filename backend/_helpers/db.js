@@ -83,7 +83,6 @@ async function initialize() {
         await sequelize.sync({ alter: true });
         console.log('Database sync complete');
 
-        // ✅ Insert default admin account if not exists
         const [rows] = await sequelize.query(
             `SELECT COUNT(*) AS count FROM accounts WHERE email = 'admin@example.com'`
         );
@@ -95,7 +94,7 @@ async function initialize() {
             await sequelize.query(`
                 INSERT INTO accounts (
                     email, passwordHash, title, firstName, lastName,
-                    acceptTerms, role, created, isActive
+                    acceptTerms, role, created, isActive, isVerified
                 ) VALUES (
                     'admin@example.com',
                     '${passwordHash}',
@@ -105,7 +104,8 @@ async function initialize() {
                     true,
                     'Admin',
                     NOW(),
-                    true
+                    true,
+                    NOW()
                 )
             `);
 
