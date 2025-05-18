@@ -16,6 +16,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 
+
 // Add debugging middleware before routes
 app.use((req, res, next) => {
     // Log all API requests for debugging
@@ -45,7 +46,14 @@ app.use((req, res, next) => {
 app.use('/accounts', require('./accounts/account.controller'));
 app.use('/departments', require('./departments/index'));
 app.use('/employees', require('./employees/index'));
-app.use('/workflows', require('./workflows/index'));
+try {
+  const workflowRoutes = require('./workflows/index');
+  app.use('/workflows', workflowRoutes);
+  console.log('Workflow routes loaded successfully');
+} catch (err) {
+  console.error('Failed to load workflow routes:', err.message);
+  // Optionally: app.use('/workflows', (req, res) => res.status(501).send('Workflows module not available'));
+}
 app.use('/requests', require('./requests/index'));  // Make sure this is added
 
 // swagger docs route
