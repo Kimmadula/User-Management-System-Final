@@ -1,7 +1,7 @@
 module.exports = {
   database: {
-    host: process.env.DB_HOST || "mysql.railway.internal",
-    port: process.env.DB_PORT || 3306,
+    host: process.env.DB_HOST || "gondola.proxy.rlwy.net",
+    port: process.env.DB_PORT || 	58293,
     user: process.env.DB_USER || "root",
     password: process.env.DB_PASSWORD || "qnrzhqBAsdQmMkQBOjZBuOXGBQWIJVJm",
     database: process.env.DB_NAME || "railway"
