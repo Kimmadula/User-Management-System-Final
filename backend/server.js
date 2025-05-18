@@ -7,128 +7,128 @@ const cookieParser = require('cookie-parser');
 const config = require('./config.json');
 const { sequelize, testSequelize } = require('./_helpers/db');
 
-// 1. Load environment variables FIRST
+// Load environment variables
 dotenv.config();
 
-// 2. Configure environment-specific settings
-const isDevelopment = process.env.NODE_ENV === 'development';
+// Test and sync database connection
+testSequelize()
+  .then(() => console.log('Database connection established'))
+  .catch(err => {
+    console.error('Database connection failed:', err);
+    process.exit(1); // Exit if database connection fails
+  });
 
-// 3. Enhanced database connection with retry logic
-const initializeDatabase = async () => {
-  try {
-    await testSequelize();
-    console.log('✅ Database connection established');
-    
-    // Sync all models
-    await sequelize.sync();
-    console.log('✅ Database models synchronized');
-  } catch (err) {
-    console.error('❌ Database connection failed:', err);
-    console.error('Error details:', {
-      name: err.name,
-      message: err.message,
-      stack: err.stack
-    });
-    process.exit(1);
-  }
-};
-
-// 4. Initialize database before starting server
-initializeDatabase();
-
-// 5. Middleware setup with enhanced CORS
+// Middleware setup
 app.use(cors({
-  origin: isDevelopment 
-    ? ['http://localhost:4200'] 
-    : ['https://user-management-system-final-29.onrender.com'],
+  origin: function(origin, callback) {
+    const allowedOrigins = [
+      'http://localhost:4200',
+      'https://user-management-system-final-29.onrender.com'
+    ];
+    if (!origin) {
+      // Allow REST tools or server-to-server requests with no origin
+      return callback(null, false);
+    }
+    if (allowedOrigins.includes(origin)) {
+      // Always reflect the request's origin if allowed
+      return callback(null, origin);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
-  exposedHeaders: ['x-auth-token']
+  optionsSuccessStatus: 200 // For legacy browser support
 }));
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 app.use(cookieParser());
 
-// 6. SUPER verbose request logging
+// Enhanced Debugging middleware
 app.use((req, res, next) => {
-  console.log('\n══════════════════════════════════════');
-  console.log(`📨 ${req.method} ${req.originalUrl}`);
-  console.log('📝 Headers:', JSON.stringify(req.headers, null, 2));
-  console.log('🍪 Cookies:', req.cookies);
-  console.log('🔍 Query:', req.query);
+  console.log('\n=== Incoming Request ===');
+  console.log('Headers:', JSON.stringify(req.headers, null, 2));
+  console.log('Cookies:', JSON.stringify(req.cookies, null, 2));
   
-  if (req.method === 'POST' || req.method === 'PUT') {
-    console.log('📦 Body:', JSON.stringify(req.body, null, 2));
-  }
-  
-  const oldSend = res.send;
-  res.send = function(data) {
-    console.log('📤 Response:', JSON.stringify(data, null, 2));
-    oldSend.apply(res, arguments);
+  const requestInfo = {
+    method: req.method,
+    path: req.path,
+    ip: req.ip,
+    query: req.query,
+    params: req.params
   };
   
+  if (req.method === 'POST' || req.method === 'PUT') {
+    requestInfo.body = req.body;
+  }
+  
+  console.log('Request Details:', JSON.stringify(requestInfo, null, 2));
   next();
 });
 
-// 7. Routes with individual error handling
-app.use('/accounts', (req, res, next) => {
-  Promise.resolve(require('./accounts/account.controller')(req, res, next))
-    .catch(next);
-});
-
+// API routes
+app.use('/accounts', require('./accounts/account.controller'));
 app.use('/departments', require('./departments/index'));
 app.use('/employees', require('./employees/index'));
 app.use('/workflows', require('./workflows/index'));
 app.use('/requests', require('./requests/index'));
 
-// 8. Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({
-    status: 'OK',
-    database: sequelize.authenticate() ? 'connected' : 'disconnected',
-    timestamp: new Date()
-  });
+// Swagger docs route
+app.use('/api-docs', require('./_helpers/swagger'));
+
+app.get('/', (req, res) => {
+  res.send('User Management System API is running!');
 });
 
-// 9. SUPER detailed error handler
+// Global error handler
 app.use((err, req, res, next) => {
-  const errorId = Math.random().toString(36).substring(2, 10);
+  console.error('\n=== Global Error Handler ===');
+  console.error('Error:', err);
+  console.error('Request URL:', req.originalUrl);
+  console.error('Request Body:', req.body);
   
-  console.error(`\n⚠️ ERROR [${errorId}] ⚠️`);
-  console.error('⏰ Timestamp:', new Date().toISOString());
-  console.error('🌐 URL:', req.method, req.originalUrl);
-  console.error('🧑‍💻 User Agent:', req.headers['user-agent']);
-  console.error('💥 Error:', err);
-  console.error('📌 Stack:', err.stack);
-  
-  if (err.errors) {
-    console.error('🔍 Validation Errors:', err.errors);
+  if (err.stack) {
+    console.error('Error stack:', err.stack);
   }
   
-  if (err.sql) {
-    console.error('🗄️ SQL Error:', {
-      query: err.sql,
-      parameters: err.parameters
+  if (err.name?.includes('Sequelize')) {
+    console.error('Sequelize error details:', {
+      name: err.name,
+      message: err.message,
+      sql: err.sql,
+      params: err.parameters
+    });
+    
+    const devMessage = process.env.NODE_ENV === 'development' 
+      ? `SQL: ${err.sql || 'N/A'}, Message: ${err.message}` 
+      : undefined;
+      
+    return res.status(400).json({ 
+      message: 'Database operation failed',
+      error: devMessage
     });
   }
-
-  const response = {
-    error: 'Internal Server Error',
-    message: 'Something went wrong',
-    ...(isDevelopment && {
-      details: err.message,
-      stack: err.stack,
-      errorId
-    })
-  };
-
-  res.status(500).json(response);
+  
+  switch (true) {
+    case typeof err === 'string':
+      const is404 = err.toLowerCase().endsWith('not found');
+      const statusCode = is404 ? 404 : 400;
+      return res.status(statusCode).json({ message: err });
+    case err.name === 'UnauthorizedError':
+      return res.status(401).json({ message: 'Unauthorized' });
+    case err.name === 'SequelizeValidationError':
+      return res.status(400).json({ message: err.errors.map(e => e.message).join(', ') });
+    case err.name === 'SequelizeUniqueConstraintError':
+      return res.status(400).json({ message: 'A record with this name already exists' });
+    default:
+      console.error('Unhandled error:', err);
+      return res.status(500).json({ 
+        message: 'Internal Server Error',
+        error: process.env.NODE_ENV === 'development' ? (err.message || err) : undefined,
+        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+      });
+  }
 });
 
-// 10. Server startup
-const port = process.env.PORT || 4000;
-app.listen(port, () => {
-  console.log(`\n🚀 Server running on port ${port}`);
-  console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🌐 CORS Allowed Origins: ${isDevelopment ? 'http://localhost:4200' : 'production URL'}`);
-});
+// Start server
+const port = process.env.NODE_ENV === 'production' ? (process.env.PORT || 80) : 4000;
+app.listen(port, () => console.log('Server listening on port ' + port));
