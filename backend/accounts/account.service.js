@@ -327,20 +327,22 @@ async function sendAlreadyRegisteredEmail(email, origin) {
     });
 }
 
-async function sendEmail({ to, subject, html, from = config.emailFrom }) {
-    const transporter = nodemailer.createTransport(config.smtpOptions);
+async function sendVerificationEmail(account, origin) {
+    let message;
+    if (origin) {
+        const verifyUrl = `${origin}/account/verify-email?token=${account.verificationToken}`;
+        message = `<p>Please click the below link to verify your email address:</p><p><a href="${verifyUrl}">${verifyUrl}</a></p>`;
+    } else {
+        message = `<p>Please use the below token to verify your email:</p><p><code>${account.verificationToken}</code></p>`;
+    }
 
-    // Debug: verify connection
-    transporter.verify(function (error, success) {
-        if (error) {
-            console.error("Email transport verification failed:", error);
-        } else {
-            console.log("Server is ready to take our messages");
-        }
+    await sendEmail({
+        to: account.email,
+        subject: 'Verify Email',
+        html: `<h4>Verify Email</h4><p>Thanks for registering!</p>${message}`
     });
-
-    await transporter.sendMail({ from, to, subject, html });
 }
+
 
 async function sendPasswordResetEmail(account, origin) {
     let message;
