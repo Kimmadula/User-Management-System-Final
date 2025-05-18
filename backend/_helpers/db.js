@@ -94,7 +94,7 @@ async function initialize() {
             await sequelize.query(`
                 INSERT INTO accounts (
                     email, passwordHash, title, firstName, lastName,
-                    acceptTerms, role, created, isActive, isVerified
+                    acceptTerms, role, created, isActive, verified
                 ) VALUES (
                     'admin@example.com',
                     '${passwordHash}',
