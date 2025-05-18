@@ -9,7 +9,7 @@ module.exports = {
   connectionString: {
     mysql: process.env.MYSQL_URL || "mysql://root:qnrzhqBAsdQmMkQBOjZBuOXGBQWIJVJm@gondola.proxy.rlwy.net:58293/railway"
   },
-  secret: process.env.JWT_SECRET || "b75e6f50c2333a5b13ae5f79bfc88b3e0a4e5dc4126de8e1a789ae0d5cf7251a",
+  secret:"b75e6f50c2333a5b13ae5f79bfc88b3e0a4e5dc4126de8e1a789ae0d5cf7251a",
   emailFrom: "pat.fadel35@ethereal.email",
   smtpOptions: {
     host: "smtp.ethereal.email",
