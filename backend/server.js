@@ -10,14 +10,6 @@ const { sequelize, testSequelize } = require('./_helpers/db');
 // Load environment variables
 dotenv.config();
 
-const cors = require('cors');
-const corsOptions ={
-    origin:'http://localhost:4200', 
-    credentials:true,            //access-control-allow-credentials:true
-    optionSuccessStatus:200
-}
-app.use(cors(corsOptions));
-
 // Middleware setup
 app.use(cors({
   origin: function(origin, callback) {
