@@ -1,4 +1,3 @@
-const config = require('config.js');
 const mysql = require('mysql2/promise');
 const { Sequelize } = require('sequelize');
 
@@ -8,10 +7,16 @@ initialize();
 
 async function initialize() {
     try {
-        // create db if it doesn't already exist
-        const { host, port, user, password, database } = config.database;
+        // Read database config from environment variables
+        const host = process.env.MYSQL_HOST || 'localhost';
+        const port = process.env.MYSQL_PORT || 3306;
+        const user = process.env.MYSQL_USER || 'root';
+        const password = process.env.MYSQL_PASSWORD || '';
+        const database = process.env.MYSQL_DATABASE || 'testdb';
+
         console.log(`Connecting to database: ${database} on ${host}:${port}`);
-        
+
+        // create db if it doesn't already exist
         const connection = await mysql.createConnection({ 
             host, 
             port, 
@@ -22,15 +27,14 @@ async function initialize() {
         await connection.query(`CREATE DATABASE IF NOT EXISTS \`${database}\`;`);
         console.log(`Database '${database}' exists or was created`);
 
-        // connect to db
+        // connect to db with Sequelize
         const sequelize = new Sequelize(database, user, password, { 
             host, 
             port, 
             dialect: 'mysql',
             logging: console.log, // Enable logging to debug
             define: {
-                // Globally disable automatic timestamps
-                timestamps: false
+                timestamps: false // Globally disable timestamps
             }
         });
 
@@ -109,10 +113,6 @@ async function initialize() {
 
         // sync all models with database
         console.log('Syncing models with database...');
-        
-        // Use force: false to avoid dropping tables
-        // Use alter: false to avoid modifying tables
-        // After running the reset script, we can safely set both to false
         await sequelize.sync({ force: false, alter: false });
         console.log('Database sync complete');
     } catch (error) {
