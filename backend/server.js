@@ -48,7 +48,7 @@ app.use((req, res, next) => {
 app.use('/accounts', require('./accounts/account.controller'));
 app.use('/departments', require('./departments/index'));
 app.use('/employees', require('./employees/index'));
-app.use('/workflows', require('./workflows'));
+app.use('/workflows', require('./workflows/index'));
 app.use('/requests', require('./requests/index'));
 
 // Swagger docs route
