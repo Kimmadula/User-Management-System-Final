@@ -13,7 +13,7 @@ async function initialize() {
         const sequelize = new Sequelize(database, user, password, {
             host,
             port,
-            dialect: 'postgres', // <-- change this from 'mysql' to 'postgres'
+            dialect: 'postgres',
             logging: false,
             pool: {
                 max: 5,
@@ -24,6 +24,12 @@ async function initialize() {
             define: {
                 timestamps: false,
                 freezeTableName: true
+            },
+            dialectOptions: {
+                ssl: {
+                    require: true,
+                    rejectUnauthorized: false // For Render and most managed Postgres
+                }
             }
         });
 
