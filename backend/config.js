@@ -10,7 +10,7 @@ module.exports = {
     mysql: process.env.MYSQL_URL || "mysql://root:qnrzhqBAsdQmMkQBOjZBuOXGBQWIJVJm@gondola.proxy.rlwy.net:58293/railway"
   },
   secret: process.env.JWT_SECRET || "THIS IS USED TO SIGN AND VERIFY JWT TOKENS, REPLACE IT WITH YOUR OWN SECRET",
-  emailFrom: "info@node-mysql-signup-verification-api.com",
+  emailFrom: "pat.fadel35@ethereal.email",
   smtpOptions: {
     host: "smtp.ethereal.email",
     port: 587,
