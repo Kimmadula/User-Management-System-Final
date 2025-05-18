@@ -108,9 +108,9 @@ async function initialize() {
                 )
             `);
 
-            console.log('✅ Default admin account inserted.');
+            console.log('Default admin account inserted.');
         } else {
-            console.log('ℹ️ Admin account already exists.');
+            console.log('Admin account already exists.');
         }
     } catch (error) {
         console.error('Database initialization error:', error);
