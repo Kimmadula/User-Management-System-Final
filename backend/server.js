@@ -17,13 +17,18 @@ app.use(cors({
       'http://localhost:4200',
       'https://user-management-system-final-29.onrender.com'
     ];
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, origin);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+    if (!origin) {
+      // Allow REST tools or server-to-server requests with no origin
+      return callback(null, false);
     }
+    if (allowedOrigins.includes(origin)) {
+      // Always reflect the request's origin if allowed
+      return callback(null, origin);
+    }
+    return callback(new Error('Not allowed by CORS'));
   },
-  credentials: true
+  credentials: true,
+  optionsSuccessStatus: 200 // For legacy browser support
 }));
 
 app.use(bodyParser.urlencoded({ extended: false }));
