@@ -6,11 +6,28 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const errorHandler = require('./_middleware/error-handler');
 
+const allowedOrigins = [
+  'http://localhost:4200', // Angular dev server
+  'https://user-management-system-final-2-7zy2.onrender.com' // Frontend service on Render
+];
 
+app.use(cors({
+  origin: function(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
+
+/*
 app.use(cors({
   origin: 'http://localhost:4200', // Angular app URL
   credentials: true
 }));
+*/
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
