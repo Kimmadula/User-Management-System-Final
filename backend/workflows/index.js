@@ -1,17 +1,14 @@
-// workflows/index.js
 const express = require('express');
 const router = express.Router();
-const controller = require('./workflow.controller');
+const workflowController = require('./workflow.controller');
 
-// Public health check endpoint
-router.get('/healthcheck', (req, res) => {
-  res.json({ 
-    status: 'Workflow service active',
-    timestamp: new Date() 
-  });
+router.get('/', (req, res) => {
+  res.json({ message: "Workflows endpoint working!" });
 });
 
-// Mount all controller routes
-router.use('/', controller);
+module.exports = router;
+
+// Forward all workflow routes to the workflow controller
+router.use('/', workflowController);
 
 module.exports = router;
