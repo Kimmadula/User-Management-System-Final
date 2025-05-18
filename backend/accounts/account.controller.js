@@ -5,7 +5,6 @@ const validateRequest = require('../_middleware/validate-request');
 const authorize = require('../_middleware/authorize');
 const Role = require('../_helpers/role');
 const accountService = require('./account.service');
-const { LoginActivity } = require('../models');
 
 // routes
 router.post('/authenticate', authenticateSchema, authenticate);
@@ -38,20 +37,8 @@ function authenticateSchema(req, res, next) {
 function authenticate(req, res, next) {
   const { email, password } = req.body;
   const ipAddress = req.ip;
-  const userAgent = req.headers['user-agent'];
-  const loginTime = new Date();
-
   accountService.authenticate({ email, password, ipAddress })
-    .then(async ({ refreshToken, ...account }) => {
-      // Save login activity
-      await LoginActivity.create({
-        accountId: account.id,
-        ipAddress,
-        userAgent,
-        loginTime
-      });
-
-      // Set refresh token cookie and respond
+    .then(({ refreshToken, ...account }) => {
       setTokenCookie(res, refreshToken);
       res.json(account);
     })

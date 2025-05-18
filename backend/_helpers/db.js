@@ -16,7 +16,7 @@ console.log('Env variables:', {
 initialize();
 
 async function createAdmin() {
-  const hashedPassword = await bcrypt.hash('1234567', 10);
+  const hashedPassword = await bcrypt.hash('AdminPassword123', 10);
 
   await Account.create({
     title: 'Mr',
