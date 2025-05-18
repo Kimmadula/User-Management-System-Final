@@ -16,7 +16,7 @@ module.exports = {
     forgotPassword,
     validateResetToken,
     resetPassword,
-    SendEmail,
+    sendVerificationEmail,
     getAll,
     getById,
     create,
