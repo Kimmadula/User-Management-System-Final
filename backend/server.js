@@ -10,6 +10,14 @@ const { sequelize, testSequelize } = require('./_helpers/db');
 // Load environment variables
 dotenv.config();
 
+// Test and sync database connection
+testSequelize()
+  .then(() => console.log('Database connection established'))
+  .catch(err => {
+    console.error('Database connection failed:', err);
+    process.exit(1); // Exit if database connection fails
+  });
+
 // Middleware setup
 app.use(cors({
   origin: function(origin, callback) {
@@ -35,27 +43,25 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-// Debugging middleware
+// Enhanced Debugging middleware
 app.use((req, res, next) => {
+  console.log('\n=== Incoming Request ===');
+  console.log('Headers:', JSON.stringify(req.headers, null, 2));
+  console.log('Cookies:', JSON.stringify(req.cookies, null, 2));
+  
   const requestInfo = {
     method: req.method,
     path: req.path,
-    ip: req.ip
+    ip: req.ip,
+    query: req.query,
+    params: req.params
   };
   
   if (req.method === 'POST' || req.method === 'PUT') {
     requestInfo.body = req.body;
   }
   
-  console.log('API Request:', JSON.stringify(requestInfo, null, 2));
-  next();
-});
-
-// Logging middleware
-app.use((req, res, next) => {
-  if (req.method === 'POST' || req.method === 'PUT') {
-    console.log(`[${req.method}] ${req.url} - Request body:`, JSON.stringify(req.body));
-  }
+  console.log('Request Details:', JSON.stringify(requestInfo, null, 2));
   next();
 });
 
@@ -75,7 +81,10 @@ app.get('/', (req, res) => {
 
 // Global error handler
 app.use((err, req, res, next) => {
-  console.error('Global error handler caught:', err);
+  console.error('\n=== Global Error Handler ===');
+  console.error('Error:', err);
+  console.error('Request URL:', req.originalUrl);
+  console.error('Request Body:', req.body);
   
   if (err.stack) {
     console.error('Error stack:', err.stack);
@@ -114,7 +123,8 @@ app.use((err, req, res, next) => {
       console.error('Unhandled error:', err);
       return res.status(500).json({ 
         message: 'Internal Server Error',
-        error: process.env.NODE_ENV === 'development' ? (err.message || err) : undefined
+        error: process.env.NODE_ENV === 'development' ? (err.message || err) : undefined,
+        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
       });
   }
 });
