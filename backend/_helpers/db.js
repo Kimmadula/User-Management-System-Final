@@ -1,7 +1,6 @@
 const mysql = require('mysql2/promise');
 const { Sequelize } = require('sequelize');
 const bcrypt = require('bcryptjs'); 
-const { Account } = require('./models');
 
 module.exports = db = {};
 
