@@ -3,6 +3,15 @@ const { Sequelize } = require('sequelize');
 
 module.exports = db = {};
 
+console.log('Env variables:', {
+  MYSQL_HOST: process.env.MYSQL_HOST,
+  MYSQL_PORT: process.env.MYSQL_PORT,
+  MYSQL_USER: process.env.MYSQL_USER,
+  MYSQL_PASSWORD: process.env.MYSQL_PASSWORD ? '***' : null,
+  MYSQL_DATABASE: process.env.MYSQL_DATABASE
+});
+
+
 initialize();
 
 async function initialize() {
