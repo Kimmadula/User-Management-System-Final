@@ -15,11 +15,10 @@ app.use(cors({
   origin: function(origin, callback) {
     const allowedOrigins = [
       'http://localhost:4200',
-      'https://user-management-system-final-29.onrender.com',
-      'https://user-management-system-final-27.onrender.com'
+      'https://user-management-system-final-29.onrender.com'
     ];
     if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true); 
+      callback(null, origin); // <-- THIS IS THE FIX
     } else {
       callback(new Error('Not allowed by CORS'));
     }
