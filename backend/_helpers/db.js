@@ -111,22 +111,9 @@ async function initialize() {
 
             console.log(' Default admin account inserted.');
         } else {
-
+            
             console.log(' Admin account already exists.');
         }
-        // delete account with id = 2 if it exists
-        await sequelize.query(`DELETE FROM accounts WHERE id = 2`);
-        console.log('Account with id = 2 deleted if it existed.');
-
-        // reset AUTO_INCREMENT value based on current max id
-        await sequelize.query(`
-            SET @max_id = (SELECT IFNULL(MAX(id), 0) FROM accounts);
-            SET @sql = CONCAT('ALTER TABLE accounts AUTO_INCREMENT = ', @max_id + 1);
-            PREPARE stmt FROM @sql;
-            EXECUTE stmt;
-            DEALLOCATE PREPARE stmt;
-        `);
-        console.log('AUTO_INCREMENT for accounts table reset.');
     } catch (error) {
         console.error('Database initialization error:', error);
         throw error;
