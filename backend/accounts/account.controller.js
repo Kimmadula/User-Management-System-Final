@@ -11,6 +11,7 @@ router.post('/authenticate', authenticateSchema, authenticate);
 router.post('/refresh-token', refreshToken);
 router.post('/revoke-token', authorize(), revokeTokenSchema, revokeToken);
 router.post('/register', registerSchema, register);
+router.get('/verify-email', verifyEmailViaGet); //Added this line to handle GET requests for email verification
 router.post('/verify-email', verifyEmailSchema, verifyEmail);
 router.post('/forgot-password', forgotPasswordSchema, forgotPassword);
 router.post('/validate-reset-token', validateResetTokenSchema, validateResetToken);
@@ -103,6 +104,22 @@ function register(req, res, next) {
   accountService.register(req.body, req.get('origin'))
     .then(() => res.json({ message: 'Registration successful, please check your email for verification instructions' }))
     .catch(next);
+}
+
+// New function to handle GET requests for email verification
+function verifyEmailViaGet(req, res, next) {
+  const token = req.query.token;
+  if (!token) {
+    return res.status(400).redirect(`${process.env.FRONTEND_URL}/login?verified=false&error=Token%20required`);
+  }
+
+  accountService.verifyEmail({ token })
+    .then(() => {
+      res.redirect(`${process.env.FRONTEND_URL}/login?verified=true`);
+    })
+    .catch(error => {
+      res.redirect(`${process.env.FRONTEND_URL}/login?verified=false&error=${encodeURIComponent(error.message)}`);
+    });
 }
 
 function verifyEmailSchema(req, res, next) {

@@ -136,6 +136,24 @@ async function register(params, origin) {
     await sendVerificationEmail(account, origin);
 }
 
+// This function is used for email verification via GET request
+async function verifyEmailViaGet(token) {
+    const account = await db.Account.findOne({ where: { verificationToken: token } });
+    if (!account) throw 'Verification failed';
+
+    account.verified = Date.now();
+    account.verificationToken = null;
+    await account.save();
+    
+    return account;
+}
+
+async function verifyEmail({ token }) {
+    const account = await verifyEmailViaGet(token);
+    return account; 
+}
+
+/*
 async function verifyEmail({ token }) {
     const account = await db.Account.findOne({ where: { verificationToken: token } });
 
@@ -145,7 +163,7 @@ async function verifyEmail({ token }) {
     account.verificationToken = null;
     await account.save();
 }
-
+*/
 
 async function forgotPassword({ email }, origin) {
     const account = await db.Account.findOne({ where: { email } });
@@ -289,6 +307,33 @@ function basicDetails(account) {
     return { id, title, firstName, lastName, email, role, created, updated, isVerified, isActive };
 }
 
+async function verifyEmail({ token }) {
+    const account = await verifyEmailViaGet(token);
+    return account; // Return the verified account
+}
+
+// Update the sendVerificationEmail function
+async function sendVerificationEmail(account, origin) {
+    let message;
+    if (origin) {
+        const verifyUrl = `${config.frontendUrl}/verify-success?token=${account.verificationToken}`;
+        message = `<p>Please click the below link to verify your email address:</p>
+                   <p><a href="${verifyUrl}">${verifyUrl}</a></p>`;
+    } else {
+        message = `<p>Please use the below token to verify your email address:</p>
+                   <p><code>${account.verificationToken}</code></p>`;
+    }
+
+    await sendEmail({
+        to: account.email,
+        subject: 'Verify Your Email',
+        html: `<h4>Verify Email</h4>
+               <p>Thanks for registering!</p>
+               ${message}`
+    });
+}
+
+/*
 async function sendVerificationEmail(account, origin) {
     let message;
     if (origin) {
@@ -308,6 +353,7 @@ async function sendVerificationEmail(account, origin) {
                ${message}`
     });
 }
+*/
 
 async function sendAlreadyRegisteredEmail(email, origin) {
     let message;
