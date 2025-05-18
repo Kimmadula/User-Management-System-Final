@@ -1,6 +1,6 @@
 const mysql = require('mysql2/promise');
 const { Sequelize } = require('sequelize');
-const bcrypt = require('bcryptjs'); // ✅ for hashing the password
+const bcrypt = require('bcryptjs'); 
 
 module.exports = db = {};
 
