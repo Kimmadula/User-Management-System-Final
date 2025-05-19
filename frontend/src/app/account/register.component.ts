@@ -1,6 +1,6 @@
 import { Component, type OnInit } from "@angular/core"
 import type { Router, ActivatedRoute } from "@angular/router"
-import { type UntypedFormBuilder, type UntypedFormGroup, Validators } from "@angular/forms"
+import { type FormBuilder, type FormGroup, Validators } from "@angular/forms"
 import { first } from "rxjs/operators"
 
 import type { AccountService, AlertService } from "@app/_services"
@@ -8,12 +8,12 @@ import { MustMatch } from "@app/_helpers"
 
 @Component({ templateUrl: "register.component.html" })
 export class RegisterComponent implements OnInit {
-  form: UntypedFormGroup
+  form: FormGroup
   loading = false
   submitted = false
 
   constructor(
-    private formBuilder: UntypedFormBuilder,
+    private formBuilder: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
     private accountService: AccountService,
@@ -54,21 +54,37 @@ export class RegisterComponent implements OnInit {
     }
 
     this.loading = true
-    this.accountService
-      .register(this.form.value)
-      .pipe(first())
-      .subscribe({
-        next: () => {
-          // Navigate to login page with registered=true query parameter
-          this.router.navigate(["../login"], {
-            relativeTo: this.route,
-            queryParams: { registered: true },
-          })
-        },
-        error: (error) => {
-          this.alertService.error(error)
-          this.loading = false
-        },
-      })
+
+    try {
+      this.accountService
+        .register(this.form.value)
+        .pipe(first())
+        .subscribe({
+          next: () => {
+            this.alertService.success(
+              "Registration successful! Please check your email for verification instructions",
+              {
+                keepAfterRouteChange: true,
+              },
+            )
+            this.router.navigate(["../login"], {
+              relativeTo: this.route,
+              queryParams: { registered: "true" },
+            })
+          },
+          error: (error) => {
+            console.error("Registration error:", error)
+            this.alertService.error(error || "Registration failed. Please try again.")
+            this.loading = false
+          },
+          complete: () => {
+            this.loading = false
+          },
+        })
+    } catch (err) {
+      console.error("Exception during registration:", err)
+      this.alertService.error("An unexpected error occurred. Please try again.")
+      this.loading = false
+    }
   }
 }
