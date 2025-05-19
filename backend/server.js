@@ -8,7 +8,7 @@ const errorHandler = require('./_middleware/error-handler');
 
 const allowedOrigins = [
   'http://localhost:4200', // Angular dev server
-  'https://user-management-system-final-2-7zy2.onrender.com' // Frontend service on Render
+  'https://user-management-system-final-1-9br2.onrender.com' // Frontend service on Render
 ];
 
 app.use(cors({
