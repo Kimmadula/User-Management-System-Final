@@ -1,5 +1,11 @@
 <h3 class="card-header">Login</h3>
 <div class="card-body">
+  <!-- Add an info alert for users who just registered -->
+  <div *ngIf="justRegistered" class="alert alert-info alert-dismissible">
+    <span>Registration successful! Please check your email for verification instructions before logging in.</span>
+    <button type="button" class="close" (click)="justRegistered = false">&times;</button>
+  </div>
+
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="form-group">
       <label>Email</label>
