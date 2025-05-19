@@ -6,16 +6,32 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const errorHandler = require('./_middleware/error-handler');
 
+const allowedOrigins = [
+  'http://localhost:4200', // Angular dev server
+  'https://user-management-system-final-2-7zy2.onrender.com' // Frontend service on Render
+];
 
+app.use(cors({
+  origin: function(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
+
+/*
 app.use(cors({
   origin: 'http://localhost:4200', // Angular app URL
   credentials: true
 }));
+*/
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser());
-
 
 // Add debugging middleware before routes
 app.use((req, res, next) => {
@@ -46,14 +62,7 @@ app.use((req, res, next) => {
 app.use('/accounts', require('./accounts/account.controller'));
 app.use('/departments', require('./departments/index'));
 app.use('/employees', require('./employees/index'));
-try {
-  const workflowRoutes = require('./workflows/index');
-  app.use('/workflows', workflowRoutes);
-  console.log('Workflow routes loaded successfully');
-} catch (err) {
-  console.error('Failed to load workflow routes:', err.message);
-  // Optionally: app.use('/workflows', (req, res) => res.status(501).send('Workflows module not available'));
-}
+app.use('/workflows', require('./workflows/index'));
 app.use('/requests', require('./requests/index'));  // Make sure this is added
 
 // swagger docs route
