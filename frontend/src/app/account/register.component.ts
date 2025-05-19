@@ -54,31 +54,20 @@ export class RegisterComponent implements OnInit {
     }
 
     this.loading = true
-
-    // Store the email for use in the success message
-    const userEmail = this.form.value.email
-
     this.accountService
       .register(this.form.value)
       .pipe(first())
       .subscribe({
         next: () => {
-          this.alertService.success("Registration successful, please check your email for verification instructions", {
-            keepAfterRouteChange: true,
+          // Navigate to login page with registered=true query parameter
+          this.router.navigate(["../login"], {
+            relativeTo: this.route,
+            queryParams: { registered: true },
           })
-          this.router.navigate(["../login"], { relativeTo: this.route })
         },
         error: (error) => {
-          // Instead of showing the error, show success and redirect
-          console.log("Registration error occurred:", error)
-
-          // Always show success message regardless of the error
-          this.alertService.success("Registration successful, please check your email for verification instructions", {
-            keepAfterRouteChange: true,
-          })
-
-          // Navigate to login page
-          this.router.navigate(["../login"], { relativeTo: this.route })
+          this.alertService.error(error)
+          this.loading = false
         },
       })
   }
