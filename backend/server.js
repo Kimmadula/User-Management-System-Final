@@ -84,12 +84,28 @@ app.use('*', (req, res) => {
 
 // ** Final error handler replaced here **
 app.use((err, req, res, next) => {
-  console.error('🔥 Full error object:', err);
+  console.error('Full error object:', err);
+  
+  // Try to get meaningful message info
+  let message = 'Unknown error';
+
+  if (typeof err === 'string') {
+    message = err;
+  } else if (err.message) {
+    message = err.message;
+  } else if (err.toString && typeof err.toString === 'function') {
+    message = err.toString();
+  } else if (typeof err === 'object') {
+    // Maybe error object has some other property with useful info
+    message = JSON.stringify(err);
+  }
+
   res.status(500).json({
-    message: typeof err === 'string' ? err : err.message || 'Unknown error',
+    message,
     stack: process.env.NODE_ENV !== 'production' ? err.stack : undefined
   });
 });
+
 
 // Start server
 const port = process.env.NODE_ENV === 'production' ? (process.env.PORT || 80) : 4000;
