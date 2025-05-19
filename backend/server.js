@@ -77,10 +77,6 @@ app.get('/', (req, res) => {
   res.send('User Management System API is running!');
 });
 
-app.use('*', (req, res) => {
-  res.status(404).json({ message: 'Route not found: ' + req.originalUrl });
-});
-
 
 // ** Final error handler replaced here **
 app.use((err, req, res, next) => {
@@ -104,6 +100,10 @@ app.use((err, req, res, next) => {
     message,
     stack: process.env.NODE_ENV !== 'production' ? err.stack : undefined
   });
+});
+
+app.use('*', (req, res) => {
+  res.status(404).json({ message: 'Route not found: ' + req.originalUrl });
 });
 
 
