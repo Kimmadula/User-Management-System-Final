@@ -99,12 +99,23 @@ function registerSchema(req, res, next) {
 }
 
 function register(req, res, next) {
-  accountService.register(req.body, req.get('origin'))
-    .then(() => res.json({ message: 'Registration successful, please check your email for verification instructions' }))
-    .catch(err => {
-      console.error('Registration error:', err); // ADD THIS
-      next(err); // Let your global error handler respond
-    });
+    accountService.register(req.body, req.get('origin'))
+        .then(result => {
+            res.json({
+                success: true,
+                message: result.message,
+                // Include these for immediate login after registration if you want
+                canLogin: false, // Set to true if you skip email verification
+                verifyUrl: `/verify-email?token=${result.verificationToken}`
+            });
+        })
+        .catch(err => {
+            console.error('Registration failed:', err);
+            res.status(400).json({
+                success: false,
+                message: typeof err === 'string' ? err : 'Registration failed'
+            });
+        });
 }
 
 function verifyEmailSchema(req, res, next) {
