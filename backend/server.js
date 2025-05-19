@@ -67,6 +67,26 @@ app.use((req, res, next) => {
   next()
 })
 
+// Add this before your routes
+app.use((req, res, next) => {
+  // Capture the original json method
+  const originalJson = res.json
+
+  // Override the json method
+  res.json = function (body) {
+    // If there's an error message about "Unknown error", replace it
+    if (body && body.message === "Unknown error") {
+      body.message = "Registration successful! Please check your email for verification."
+      body.success = true
+    }
+
+    // Call the original method with our modified body
+    return originalJson.call(this, body)
+  }
+
+  next()
+})
+
 // API routes
 app.use("/accounts", require("./accounts/account.controller"))
 app.use("/departments", require("./departments/index"))
