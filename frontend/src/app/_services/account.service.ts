@@ -1,18 +1,19 @@
 import { Injectable } from "@angular/core"
 import type { Router } from "@angular/router"
-import type { HttpClient } from "@angular/common/http"
+import { type HttpClient, HttpErrorResponse } from "@angular/common/http"
 import { BehaviorSubject, type Observable, throwError } from "rxjs"
-import { map, finalize, catchError } from "rxjs/operators"
+import { map, finalize, catchError, tap } from "rxjs/operators"
 
 import { environment } from "@environments/environment"
 import type { Account } from "@app/_models"
 
 const baseUrl = `${environment.apiUrl}/accounts`
+
 @Injectable({ providedIn: "root" })
 export class AccountService {
-  [x: string]: any
   private accountSubject: BehaviorSubject<Account>
   public account: Observable<Account>
+  private refreshTokenTimeout: any
 
   constructor(
     private router: Router,
@@ -39,6 +40,7 @@ export class AccountService {
         this.startRefreshTokenTimer()
         return response
       }),
+      catchError(this.handleError),
     )
   }
 
@@ -56,51 +58,53 @@ export class AccountService {
         this.startRefreshTokenTimer()
         return account
       }),
+      catchError(this.handleError),
     )
   }
 
   register(account: Account) {
+    console.log("Registering account:", account)
     return this.http.post(`${baseUrl}/register`, account).pipe(
-      map(() => {
-        // Return a success message that will be displayed on the login page
-        return {
-          success: true,
-          message: "Registration successful! Please check your email for verification instructions.",
-        }
-      }),
+      tap(() => console.log("Registration successful")),
       catchError((error) => {
-        console.error("Registration error:", error)
-        return throwError(() => error.error?.message || "Registration failed. Please try again.")
+        console.error("Registration error in service:", error)
+        if (error instanceof HttpErrorResponse) {
+          console.error("Status:", error.status, "Message:", error.message)
+          return throwError(() => error.error?.message || "Registration failed. Please try again.")
+        }
+        return throwError(() => "Registration failed. Please try again.")
       }),
     )
   }
 
   verifyEmail(token: string) {
-    return this.http.post(`${baseUrl}/verify-email`, { token })
+    return this.http.post(`${baseUrl}/verify-email`, { token }).pipe(catchError(this.handleError))
   }
 
   forgotPassword(email: string) {
-    return this.http.post(`${baseUrl}/forgot-password`, { email })
+    return this.http.post(`${baseUrl}/forgot-password`, { email }).pipe(catchError(this.handleError))
   }
 
   validateResetToken(token: string) {
-    return this.http.post(`${baseUrl}/validate-reset-token`, { token })
+    return this.http.post(`${baseUrl}/validate-reset-token`, { token }).pipe(catchError(this.handleError))
   }
 
   resetPassword(token: string, password: string, confirmPassword: string) {
-    return this.http.post(`${baseUrl}/reset-password`, { token, password, confirmPassword })
+    return this.http
+      .post(`${baseUrl}/reset-password`, { token, password, confirmPassword })
+      .pipe(catchError(this.handleError))
   }
 
   getAll() {
-    return this.http.get<Account[]>(baseUrl)
+    return this.http.get<Account[]>(baseUrl).pipe(catchError(this.handleError))
   }
 
   getById(id: string) {
-    return this.http.get<Account>(`${baseUrl}/${id}`)
+    return this.http.get<Account>(`${baseUrl}/${id}`).pipe(catchError(this.handleError))
   }
 
   create(params) {
-    return this.http.post(baseUrl, params)
+    return this.http.post(baseUrl, params).pipe(catchError(this.handleError))
   }
 
   update(id, params) {
@@ -114,6 +118,7 @@ export class AccountService {
         }
         return account
       }),
+      catchError(this.handleError),
     )
   }
 
@@ -123,6 +128,7 @@ export class AccountService {
         // auto logout if the logged in account deleted their own record
         if (id === this.accountValue.id) this.logout()
       }),
+      catchError(this.handleError),
     )
   }
 
@@ -137,12 +143,25 @@ export class AccountService {
         }
         return account
       }),
+      catchError(this.handleError),
     )
   }
 
   // helper methods
+  private handleError(error: HttpErrorResponse) {
+    console.error("API error:", error)
 
-  private refreshTokenTimeout
+    if (error.error instanceof ErrorEvent) {
+      // Client-side error
+      console.error("Client error:", error.error.message)
+      return throwError(() => error.error.message || "Something went wrong. Please try again.")
+    } else {
+      // Server-side error
+      console.error(`Backend returned code ${error.status}, body was:`, error.error)
+      return throwError(() => error.error?.message || `Server error: ${error.status}`)
+    }
+  }
+
   private startRefreshTokenTimer() {
     try {
       // parse json object from base64 encoded jwt token
