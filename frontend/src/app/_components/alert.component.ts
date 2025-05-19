@@ -7,8 +7,8 @@ import type { AlertService } from "@app/_services"
 
 @Component({ selector: "alert", templateUrl: "alert.component.html" })
 export class AlertComponent implements OnInit, OnDestroy {
-  @Input() id = "default-alert" // Used for CSS styling
-  @Input() fade = true // Used for CSS animation
+  @Input() id = "default-alert"
+  @Input() fade = true
 
   alerts: Alert[] = []
   alertSubscription: Subscription
@@ -36,8 +36,8 @@ export class AlertComponent implements OnInit, OnDestroy {
       this.alerts.push(alert)
 
       // auto close alert if required
-      if (alert.autoClose !== false) {
-        setTimeout(() => this.removeAlert(alert), 5000) // Increased timeout to 5 seconds
+      if (alert.autoClose) {
+        setTimeout(() => this.removeAlert(alert), 5000)
       }
     })
 
@@ -63,7 +63,7 @@ export class AlertComponent implements OnInit, OnDestroy {
       // fade out alert
       alert.fade = true
 
-      // remove alert after faded
+      // remove alert after faded out
       setTimeout(() => {
         this.alerts = this.alerts.filter((x) => x !== alert)
       }, 250)
@@ -73,16 +73,16 @@ export class AlertComponent implements OnInit, OnDestroy {
     }
   }
 
-  cssClasses(alert: Alert) {
+  cssClass(alert: Alert) {
     if (!alert) return
 
-    const classes = ["alert", "alert-dismissible"]
+    const classes = ["alert", "alert-dismissable", "mt-4", "container"]
 
     const alertTypeClass = {
-      [AlertType.Success]: "alert alert-success",
-      [AlertType.Error]: "alert alert-danger",
-      [AlertType.Info]: "alert alert-info",
-      [AlertType.Warning]: "alert alert-warning",
+      [AlertType.Success]: "alert-success",
+      [AlertType.Error]: "alert-danger",
+      [AlertType.Info]: "alert-info",
+      [AlertType.Warning]: "alert-warning",
     }
 
     classes.push(alertTypeClass[alert.type])
