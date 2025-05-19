@@ -6,6 +6,7 @@ import {
   type HttpEvent,
   type HttpInterceptor,
   HTTP_INTERCEPTORS,
+  HttpErrorResponse,
 } from "@angular/common/http"
 import { type Observable, of, throwError } from "rxjs"
 import { delay, materialize, dematerialize } from "rxjs/operators"
@@ -666,51 +667,67 @@ export class FakeBackendInterceptor implements HttpInterceptor {
       return ok()
     }
 
-    // Update the register function in the fake backend to handle registration better
+    // Fixed register function to properly handle registration
     function register() {
-      const account = body
+      try {
+        console.log("Register function called with body:", body)
+        const account = body
 
-      if (accounts.find((x) => x.email === account.email)) {
-        // display email already registered "email" in alert
+        // Check if email already exists
+        if (accounts.find((x) => x.email === account.email)) {
+          console.log(`Email ${account.email} is already registered`)
+          return ok({
+            success: false,
+            message: `Email ${account.email} is already registered`,
+          })
+        }
+
+        // assign account id and a few other properties then save
+        account.id = newAccountId()
+        if (account.id === 1) {
+          // first registered account is an admin
+          account.role = Role.Admin
+        } else {
+          account.role = Role.User
+        }
+        account.dateCreated = new Date().toISOString()
+        account.verificationToken = new Date().getTime().toString()
+        account.isVerified = false
+        account.isActive = true
+        account.refreshTokens = []
+        delete account.confirmPassword
+
+        console.log("Saving new account:", account)
+        accounts.push(account)
+        localStorage.setItem(accountsKey, JSON.stringify(accounts))
+
+        // Update our users array to stay in sync
+        self.syncUsersWithAccounts()
+
+        // Display verification email in alert (but don't block the response)
         setTimeout(() => {
+          const verifyUrl = `${location.origin}/account/verify-email?token=${account.verificationToken}`
           alertService.info(
             `
-                <h4>Email Already Registered</h4>
-                <p>Your email <strong>${account.email}</strong> is already registered.</p>
-                <p>If you don't know your password please visit the <a href="${location.origin}/account/forgot-password">forgot password</a> page.</p>
-                <div><strong>Note:</strong> The fake backend displayed this "email" so you can test without an api. A real backend would send a real email.</div>
-                `,
+            <h4>Verification Email</h4>
+            <p>Thanks for registering!</p>
+            <p>Please click the below link to verify your email address:</p>
+            <p><a href="${verifyUrl}">${verifyUrl}</a></p>
+            <div><strong>Note:</strong> The fake backend displayed this "email" so you can test without an api. A real backend would send a real email.</div>
+            `,
             { autoClose: false },
           )
         }, 1000)
 
-        // always return ok() response to prevent email enumeration
-        return ok()
+        console.log("Registration successful")
+        return ok({
+          success: true,
+          message: "Registration successful! Please check your email for verification instructions.",
+        })
+      } catch (error) {
+        console.error("Error in register function:", error)
+        return serverError("An unexpected error occurred during registration")
       }
-
-      // assign account id and a few other properties then save
-      account.id = newAccountId()
-      if (account.id === 1) {
-        // first registered account is an admin
-        account.role = Role.Admin
-      } else {
-        account.role = Role.User
-      }
-      account.dateCreated = new Date().toISOString()
-      account.verificationToken = new Date().getTime().toString()
-      account.isVerified = false
-      account.isActive = true
-      account.refreshTokens = []
-      delete account.confirmPassword
-      accounts.push(account)
-      localStorage.setItem(accountsKey, JSON.stringify(accounts))
-
-      // Update our users array to stay in sync
-      self.syncUsersWithAccounts()
-
-      // Return success immediately without showing the verification email alert
-      // The login page will show the verification message instead
-      return ok()
     }
 
     function verifyEmail() {
@@ -925,6 +942,16 @@ export class FakeBackendInterceptor implements HttpInterceptor {
       return throwError({ error: { message } }).pipe(materialize(), delay(500), dematerialize())
     }
 
+    function serverError(message) {
+      return throwError(
+        new HttpErrorResponse({
+          error: { message },
+          status: 500,
+          statusText: "Internal Server Error",
+        }),
+      ).pipe(materialize(), delay(500), dematerialize())
+    }
+
     function unauthorized() {
       return throwError({ status: 401, error: { message: "Unauthorized" } }).pipe(
         materialize(),
@@ -944,6 +971,11 @@ export class FakeBackendInterceptor implements HttpInterceptor {
     function authorize(requiredRole, callback) {
       console.log(`FAKE BACKEND - Authorize function called with requiredRole: ${requiredRole || "none"}`)
       console.log(`FAKE BACKEND - Current URL: ${url}, Method: ${method}`)
+
+      // Special case for registration - no authorization needed
+      if (url.endsWith("/accounts/register") && method === "POST") {
+        return callback()
+      }
 
       const user = getUser()
       console.log(`FAKE BACKEND - User from getUser():`, user)
