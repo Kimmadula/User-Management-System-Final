@@ -80,26 +80,31 @@ app.get('/', (req, res) => {
 
 // ** Final error handler replaced here **
 app.use((err, req, res, next) => {
-  console.error('Full error object:', err);
-  
-  // Try to get meaningful message info
-  let message = 'Unknown error';
-
-  if (typeof err === 'string') {
-    message = err;
-  } else if (err.message) {
-    message = err.message;
-  } else if (err.toString && typeof err.toString === 'function') {
-    message = err.toString();
-  } else if (typeof err === 'object') {
-    // Maybe error object has some other property with useful info
-    message = JSON.stringify(err);
-  }
-
-  res.status(500).json({
-    message,
-    stack: process.env.NODE_ENV !== 'production' ? err.stack : undefined
-  });
+    console.error('Error:', err);
+    
+    // Handle Joi validation errors
+    if (err instanceof require('joi').ValidationError) {
+        return res.status(400).json({
+            success: false,
+            message: 'Validation error',
+            details: err.details.map(d => d.message)
+        });
+    }
+    
+    // Handle Sequelize errors
+    if (err.name && err.name.includes('Sequelize')) {
+        return res.status(400).json({
+            success: false,
+            message: 'Database error',
+            details: err.errors ? err.errors.map(e => e.message) : err.message
+        });
+    }
+    
+    // Standard error response
+    res.status(500).json({
+        success: false,
+        message: typeof err === 'string' ? err : 'An error occurred'
+    });
 });
 
 app.use('*', (req, res) => {
