@@ -1,19 +1,19 @@
 import { Component, type OnInit } from "@angular/core"
 import type { Router, ActivatedRoute } from "@angular/router"
-import { type UntypedFormBuilder, type UntypedFormGroup, Validators } from "@angular/forms"
+import { type FormBuilder, type FormGroup, Validators } from "@angular/forms"
 import { first } from "rxjs/operators"
 
 import type { AccountService, AlertService } from "@app/_services"
 
 @Component({ templateUrl: "login.component.html" })
 export class LoginComponent implements OnInit {
-  form: UntypedFormGroup
+  form: FormGroup
   loading = false
   submitted = false
-  justRegistered = false
+  registrationSuccess = false
 
   constructor(
-    private formBuilder: UntypedFormBuilder,
+    private formBuilder: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
     private accountService: AccountService,
@@ -26,10 +26,10 @@ export class LoginComponent implements OnInit {
       password: ["", Validators.required],
     })
 
-    // Check if user was redirected from registration page
+    // Check if user just registered
     this.route.queryParams.subscribe((params) => {
-      if (params["registered"]) {
-        this.justRegistered = true
+      if (params["registered"] === "true") {
+        this.registrationSuccess = true
       }
     })
   }
