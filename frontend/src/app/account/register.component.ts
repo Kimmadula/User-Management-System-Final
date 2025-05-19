@@ -55,36 +55,30 @@ export class RegisterComponent implements OnInit {
 
     this.loading = true
 
-    try {
-      this.accountService
-        .register(this.form.value)
-        .pipe(first())
-        .subscribe({
-          next: () => {
-            this.alertService.success(
-              "Registration successful! Please check your email for verification instructions",
-              {
-                keepAfterRouteChange: true,
-              },
-            )
-            this.router.navigate(["../login"], {
-              relativeTo: this.route,
-              queryParams: { registered: "true" },
-            })
-          },
-          error: (error) => {
-            console.error("Registration error:", error)
-            this.alertService.error(error || "Registration failed. Please try again.")
-            this.loading = false
-          },
-          complete: () => {
-            this.loading = false
-          },
-        })
-    } catch (err) {
-      console.error("Exception during registration:", err)
-      this.alertService.error("An unexpected error occurred. Please try again.")
-      this.loading = false
-    }
+    // Remove the try-catch that might be swallowing errors
+    this.accountService
+      .register(this.form.value)
+      .pipe(first())
+      .subscribe({
+        next: () => {
+          // Registration successful
+          this.alertService.success("Registration successful, please check your email for verification instructions", {
+            keepAfterRouteChange: true,
+          })
+          this.router.navigate(["../login"], { relativeTo: this.route })
+        },
+        error: (error) => {
+          // Log the actual error for debugging
+          console.error("Registration error:", error)
+
+          // Show a more specific error message if available
+          const errorMessage = error?.error?.message || error?.message || "Registration failed"
+          this.alertService.error(errorMessage)
+          this.loading = false
+        },
+        complete: () => {
+          this.loading = false
+        },
+      })
   }
 }
