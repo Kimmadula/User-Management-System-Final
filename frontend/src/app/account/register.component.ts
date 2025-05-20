@@ -1,8 +1,8 @@
 import { Component, type OnInit } from "@angular/core"
 import type { Router, ActivatedRoute } from "@angular/router"
-import { type FormBuilder, type FormGroup, Validators } from "@angular/forms"
+import { FormBuilder, FormGroup, Validators } from "@angular/forms"
 
-import type { AccountService, AlertService } from "@app/_services"
+import { AccountService, AlertService } from "@app/_services"
 import { MustMatch } from "@app/_helpers"
 
 @Component({ templateUrl: "register.component.html" })
