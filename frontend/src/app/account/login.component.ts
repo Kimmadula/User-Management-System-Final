@@ -1,9 +1,9 @@
 import { Component, type OnInit } from "@angular/core"
 import type { Router, ActivatedRoute } from "@angular/router"
-import { type FormBuilder, type FormGroup, Validators } from "@angular/forms"
+import { FormBuilder, FormGroup, Validators } from "@angular/forms"
 import { first } from "rxjs/operators"
 
-import type { AccountService, AlertService } from "@app/_services"
+import { AccountService, AlertService } from "@app/_services"
 
 @Component({ templateUrl: "login.component.html" })
 export class LoginComponent implements OnInit {
