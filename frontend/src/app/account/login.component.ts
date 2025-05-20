@@ -10,7 +10,7 @@ export class LoginComponent implements OnInit {
   form: FormGroup
   loading = false
   submitted = false
-  registrationSuccess = false
+  returnUrl: string
 
   constructor(
     private formBuilder: FormBuilder,
@@ -26,12 +26,16 @@ export class LoginComponent implements OnInit {
       password: ["", Validators.required],
     })
 
+    // get return url from route parameters or default to '/'
+    this.returnUrl = this.route.snapshot.queryParams["returnUrl"] || "/"
+
     // Check if user just registered
-    this.route.queryParams.subscribe((params) => {
-      if (params["registered"] === "true") {
-        this.registrationSuccess = true
-      }
-    })
+    const registered = this.route.snapshot.queryParams["registered"]
+    if (registered) {
+      this.alertService.success("Registration successful! Please check your email for verification instructions.", {
+        keepAfterRouteChange: true,
+      })
+    }
   }
 
   // convenience getter for easy access to form fields
@@ -56,9 +60,7 @@ export class LoginComponent implements OnInit {
       .pipe(first())
       .subscribe({
         next: () => {
-          // get return url from query parameters or default to home page
-          const returnUrl = this.route.snapshot.queryParams["returnUrl"] || "/"
-          this.router.navigateByUrl(returnUrl)
+          this.router.navigate([this.returnUrl])
         },
         error: (error) => {
           this.alertService.error(error)
