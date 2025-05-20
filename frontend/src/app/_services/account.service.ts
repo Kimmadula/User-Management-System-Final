@@ -13,6 +13,7 @@ const baseUrl = `${environment.apiUrl}/accounts`
 export class AccountService {
   private accountSubject: BehaviorSubject<Account>
   public account: Observable<Account>
+  private refreshTokenTimeout: any
 
   constructor(
     private router: Router,
@@ -126,21 +127,40 @@ export class AccountService {
     )
   }
 
+  // Add the missing updateStatus method
+  updateStatus(id: string, isActive: boolean) {
+    return this.http.put<any>(`${baseUrl}/${id}/status`, { isActive }).pipe(
+      map((account) => {
+        // If we're updating the current user, update the subject
+        if (account.id === this.accountValue?.id) {
+          // publish updated account to subscribers
+          account = { ...this.accountValue, ...account }
+          this.accountSubject.next(account)
+        }
+        return account
+      }),
+    )
+  }
+
   // helper methods
-
-  private refreshTokenTimeout
-
   private startRefreshTokenTimer() {
-    // parse json object from base64 encoded jwt token
-    const jwtToken = JSON.parse(atob(this.accountValue.jwtToken.split(".")[1]))
+    try {
+      // parse json object from base64 encoded jwt token
+      const jwtToken = JSON.parse(atob(this.accountValue.jwtToken.split(".")[1]))
 
-    // set a timeout to refresh the token a minute before it expires
-    const expires = new Date(jwtToken.exp * 1000)
-    const timeout = expires.getTime() - Date.now() - 60 * 1000
-    this.refreshTokenTimeout = setTimeout(() => this.refreshToken().subscribe(), timeout)
+      // set a timeout to refresh the token a minute before it expires
+      const expires = new Date(jwtToken.exp * 1000)
+      const timeout = expires.getTime() - Date.now() - 60 * 1000
+      this.refreshTokenTimeout = setTimeout(() => this.refreshToken().subscribe(), timeout)
+    } catch (error) {
+      console.error("Error starting refresh token timer:", error)
+    }
   }
 
   private stopRefreshTokenTimer() {
-    clearTimeout(this.refreshTokenTimeout)
+    if (this.refreshTokenTimeout) {
+      clearTimeout(this.refreshTokenTimeout)
+      this.refreshTokenTimeout = null
+    }
   }
 }
