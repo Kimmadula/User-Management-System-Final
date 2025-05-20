@@ -5,12 +5,14 @@ import { first } from "rxjs/operators"
 
 import type { AccountService, AlertService } from "@app/_services"
 
-@Component({ templateUrl: "login.component.html" })
+@Component({
+  templateUrl: "login.component.html",
+})
 export class LoginComponent implements OnInit {
-  form: FormGroup
+  form!: FormGroup
   loading = false
   submitted = false
-  returnUrl: string
+  returnUrl = ""
 
   constructor(
     private formBuilder: FormBuilder,
@@ -29,12 +31,9 @@ export class LoginComponent implements OnInit {
     // get return url from route parameters or default to '/'
     this.returnUrl = this.route.snapshot.queryParams["returnUrl"] || "/"
 
-    // Check if user just registered
-    const registered = this.route.snapshot.queryParams["registered"]
-    if (registered) {
-      this.alertService.success("Registration successful! Please check your email for verification instructions.", {
-        keepAfterRouteChange: true,
-      })
+    // show success message on registration
+    if (this.route.snapshot.queryParams["registered"]) {
+      this.alertService.success("Registration successful, please check your email for verification instructions")
     }
   }
 
@@ -56,7 +55,7 @@ export class LoginComponent implements OnInit {
 
     this.loading = true
     this.accountService
-      .login(this.f.email.value, this.f.password.value)
+      .login(this.f["email"].value, this.f["password"].value)
       .pipe(first())
       .subscribe({
         next: () => {
