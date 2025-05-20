@@ -2,7 +2,6 @@ const config = require("../config.json")
 const mysql = require("mysql2/promise")
 const { Sequelize } = require("sequelize")
 
-// Export db object directly
 const db = {}
 module.exports = db
 
@@ -35,9 +34,7 @@ async function initialize() {
       },
     })
 
-    // 3. Define User model directly in db.js instead of importing it
-    // This eliminates the need to find the external file
-    console.log("Defining User model directly in db.js")
+    // 3. Define User model directly in db.js
     db.User = sequelize.define("User", {
       id: {
         type: Sequelize.DataTypes.INTEGER,
