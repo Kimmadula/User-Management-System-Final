@@ -5,20 +5,28 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
       primaryKey: true,
     },
-    email: {
-      type: DataTypes.STRING,
+    firstName: { type: DataTypes.STRING, allowNull: false },
+    lastName: { type: DataTypes.STRING, allowNull: false },
+    username: { type: DataTypes.STRING, allowNull: false },
+    email: { type: DataTypes.STRING, allowNull: false },
+    passwordHash: { type: DataTypes.STRING, allowNull: false },
+    role: { type: DataTypes.STRING, allowNull: false },
+    verificationToken: { type: DataTypes.STRING },
+    verified: { type: DataTypes.DATE },
+    resetToken: { type: DataTypes.STRING },
+    resetTokenExpires: { type: DataTypes.DATE },
+    passwordReset: { type: DataTypes.DATE },
+    created: {
+      type: DataTypes.DATE,
       allowNull: false,
-      unique: true,
+      defaultValue: DataTypes.NOW,
     },
-    passwordHash: {
-      type: DataTypes.STRING,
+    updated: {
+      type: DataTypes.DATE,
       allowNull: false,
-    },
-    role: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      defaultValue: "User",
+      defaultValue: DataTypes.NOW,
     },
   })
+
   return User
 }
