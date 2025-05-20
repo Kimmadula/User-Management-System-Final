@@ -1,9 +1,10 @@
 const config = require("../config.json")
 const mysql = require("mysql2/promise")
 const { Sequelize } = require("sequelize")
+const path = require("path")
+const fs = require("fs")
 
 const db = {}
-module.exports = db
 
 initialize()
 
@@ -34,32 +35,71 @@ async function initialize() {
       },
     })
 
-    // 3. Define User model directly in db.js
-    db.User = sequelize.define("User", {
-      id: {
-        type: Sequelize.DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
-      },
-      email: {
-        type: Sequelize.DataTypes.STRING,
-        allowNull: false,
-        unique: true,
-      },
-      passwordHash: {
-        type: Sequelize.DataTypes.STRING,
-        allowNull: false,
-      },
-      role: {
-        type: Sequelize.DataTypes.STRING,
-        allowNull: false,
-        defaultValue: "User",
-      },
-    })
+    // 3. Load models - with path resolution to fix deployment issues
+    const modelsPath = path.join(__dirname, "..", "models")
+    console.log("Looking for models in:", modelsPath)
+
+    if (fs.existsSync(modelsPath)) {
+      console.log("Models directory exists")
+      const userModelPath = path.join(modelsPath, "user.model.js")
+
+      if (fs.existsSync(userModelPath)) {
+        console.log("User model file exists at:", userModelPath)
+        db.User = require(userModelPath)(sequelize, Sequelize.DataTypes)
+      } else {
+        console.log("User model file not found at:", userModelPath)
+        // Define model inline as fallback
+        db.User = sequelize.define("User", {
+          id: {
+            type: Sequelize.DataTypes.INTEGER,
+            autoIncrement: true,
+            primaryKey: true,
+          },
+          email: {
+            type: Sequelize.DataTypes.STRING,
+            allowNull: false,
+            unique: true,
+          },
+          passwordHash: {
+            type: Sequelize.DataTypes.STRING,
+            allowNull: false,
+          },
+          role: {
+            type: Sequelize.DataTypes.STRING,
+            allowNull: false,
+            defaultValue: "User",
+          },
+        })
+      }
+    } else {
+      console.log("Models directory does not exist")
+      // Define model inline as fallback
+      db.User = sequelize.define("User", {
+        id: {
+          type: Sequelize.DataTypes.INTEGER,
+          autoIncrement: true,
+          primaryKey: true,
+        },
+        email: {
+          type: Sequelize.DataTypes.STRING,
+          allowNull: false,
+          unique: true,
+        },
+        passwordHash: {
+          type: Sequelize.DataTypes.STRING,
+          allowNull: false,
+        },
+        role: {
+          type: Sequelize.DataTypes.STRING,
+          allowNull: false,
+          defaultValue: "User",
+        },
+      })
+    }
 
     // 4. Sync all models
     await sequelize.sync({ alter: true })
-    console.log("Database synced successfully")
+    console.log("Database synced")
 
     db.sequelize = sequelize
     db.Sequelize = Sequelize
