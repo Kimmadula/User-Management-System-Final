@@ -1,5 +1,5 @@
 import { Component, type OnInit, type OnDestroy, Input } from "@angular/core"
-import { type Router, NavigationStart } from "@angular/router"
+import { Router, NavigationStart } from "@angular/router"
 import type { Subscription } from "rxjs"
 
 import { type Alert, AlertType } from "@app/_models"
